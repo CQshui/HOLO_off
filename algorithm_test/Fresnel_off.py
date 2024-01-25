@@ -86,7 +86,6 @@ def on_mouse(event, x, y, flags, param):
         U0 = np.roll(U0, -delta_x, axis=1)
         U0 = np.roll(U0, -delta_y, axis=0)
 
-
 # 背景图
 back = Image.open('D:\\Desktop\\test\\Bg-noRule-Gyp.jpg')
 # 原始图像
@@ -109,7 +108,6 @@ plt.imsave('D:\\Desktop\\test\\FFT.jpg', U1, cmap="gray")
 img_paths = 'D:\\Desktop\\test\\FFT.jpg'
 for img_path in glob.glob(img_paths):
     img_id = os.path.basename(img_path)
-    # img_id = img_name.split('.')[0]
     cut(img_path)
 
 # 对截取后的U0重建
