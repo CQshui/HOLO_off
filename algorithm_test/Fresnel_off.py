@@ -57,14 +57,11 @@ def on_mouse(event, x, y, flags, param):
         counter_w = []
         counter_h = []
         for contour in contours:
-            # cv2.drawContours(img, [contour], -1, (0, 255, 0), 2)
             x, y, w, h = cv2.boundingRect(contour)
             counter_x.append(x)
             counter_y.append(y)
             counter_w.append(w)
             counter_h.append(h)
-            # aspect_ratio = float(w) / h
-            # chars.append(img[y:y + h, x:x + w])
         # 找到最大宽度的矩形并画出
         max_index = counter_w.index(max(counter_w))
         x_center = counter_x[max_index]
