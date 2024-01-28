@@ -9,9 +9,9 @@ from phase_reconstruction import phase_unwrap
 
 
 # 对FFT频谱图截图
-def cut(img_path):
+def cut(path):
     global img, img_height, img_width
-    img = cv2.imread(img_path, 0)
+    img = cv2.imread(path, 0)
     img_height, img_width = img.shape[:2]
     cv2.namedWindow('image', 0)
     cv2.setMouseCallback('image', on_mouse)
@@ -83,11 +83,14 @@ def on_mouse(event, x, y, flags, param):
         U0 = np.roll(U0, -delta_x, axis=1)
         U0 = np.roll(U0, -delta_y, axis=0)
 
+
 # 背景图
 back = Image.open('D:\\Desktop\\test\\Bg-noRule-Gyp.jpg')
 # 原始图像
-# image0 = Image.open('D:\\Desktop\\test\\Bg-noRule-Lime.jpg')
-image0 = Image.open('D:\\Desktop\\test\\iron.jpg')
+image0 = Image.open('D:\\Desktop\\test\\Test3-Dry-Gypsum-noRule-1.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\Test6-Dry-Limestone-noRule-1.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\iron.jpg')
+
 width, height = image0.size
 # 生成原始图像和背景图的灰度图和数组
 grayscale_image = image0.convert("L")
@@ -114,12 +117,15 @@ U0_processed = ifft2(ifftshift(U0))
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 0.098e-6  # 3.55e-6
+pix = 0.098e-6   # 0.098e-6
 k = 2*np.pi/lam
 # 重建距离
-z1 = 0.00001  # 0.0575
-z2 = 0.00003  # 0.0640
+z1 = 0.00001  # 0.00001
+z2 = 0.00003  # .00003
 z_interval = 0.00001
+# z1 = 0.000001  # 0.00001
+# z2 = 0.000020  # .00003
+# z_interval = 0.000001
 #
 x = np.linspace(-pix*width/2, pix*width/2, width)
 y = np.linspace(-pix*height/2, pix*height/2, height)

@@ -10,7 +10,8 @@ from skimage.filters import gaussian
 def phase_unwrap(U):
     ang = np.angle(U)
     phase_unwrapped = unwrap_phase(ang)
-    return phase_unwrapped
+    return ang
+    # return phase_unwrapped
 
 
 def compensate(U, height, width):
