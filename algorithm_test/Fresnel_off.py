@@ -88,10 +88,13 @@ def on_mouse(event, x, y, flags, param):
 
 
 # 背景图
-back = Image.open('D:\\Desktop\\test\\Bg-noRule-Gyp.jpg')
+back = Image.open('D:\\Desktop\\test\\bg\\Bg-noRule-Gyp.jpg')
 # 原始图像
-# image0 = Image.open('D:\\Desktop\\test\\Bg-noRule-Lime.jpg')
-image0 = Image.open('D:\\Desktop\\test\\iron.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\origin\\Test4-Dry-Gypsum-noRule-3.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\origin\\Test6-Dry-Limestone-noRule-1.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\origin\\Test7-Dry-GlassBeads-noRule-1.jpg')
+# image0 = Image.open('D:\\Desktop\\test\\origin\\iron.jpg')
+image0 = Image.open('D:\\Desktop\\test\\origin\\稀释40倍 1.bmp')
 width, height = image0.size
 # 生成原始图像和背景图的灰度图和数组
 grayscale_image = image0.convert("L")
@@ -119,12 +122,12 @@ U0_processed = ifft2(ifftshift(U0))
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 0.098e-6  # 3.55e-6
+pix = 3.55e-6  # 0.098e-6
 k = 2*np.pi/lam
 # 重建距离
-z1 = 0.00001  # 0.0575
-z2 = 0.00003  # 0.0640
-z_interval = 0.00001
+z1 = 0.5
+z2 = 0.6
+z_interval = 0.01
 #
 x = np.linspace(-pix*width/2, pix*width/2, width)
 y = np.linspace(-pix*height/2, pix*height/2, height)
@@ -138,9 +141,11 @@ for i in range(len(z)):
     U2 = U1*H
     U3 = ifftshift(ifft2(U2))
     U4 = phase_unwrap(U3)
+    # new_U4 = [[127.5+x/2 for x in row] for row in U4]
+    # print(new_U4)
     # compensation_matrix = compensate(U4, height, width)
     # edges = compensate(U4, height, width)
     plt.imsave('D:\\Desktop\\test\\offaxis\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U3), cmap="gray")
-    plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U4), cmap="gray")
+    plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
     # plt.imsave('D:\\Desktop\\test\\unwrap\\edge_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(edges), cmap="gray")
     # plt.imsave('D:\\Desktop\\test\\unwrap\\phase_correct_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U5), cmap="gray")
