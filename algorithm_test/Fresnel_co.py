@@ -3,7 +3,7 @@ from PIL import Image
 from numpy.fft import fftshift, fft2, ifft2, ifftshift
 import matplotlib.pyplot as plt
 # 同轴平面波菲涅尔变换
-image = Image.open('E:\pycharm_test\Fig\\test_coaxis\holo_fig1.bmp')
+image = Image.open('D:\\Desktop\\test\\origin\\稀释20倍 10.bmp')
 width, height = image.size
 grayscale_image = image.convert("L")
 grayscale_array = np.asarray(grayscale_image)
@@ -11,12 +11,12 @@ grayscale_array = np.asarray(grayscale_image)
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 1.72e-6
+pix = 1.74e-6
 k = 2*np.pi/lam
 # 重建距离
-z1 = 0.01
-z2 = 0.02
-z_interval = 0.0001
+z1 = 0.014
+z2 = 0.016
+z_interval = 0.001
 #
 x = np.linspace(-pix*width/2, pix*width/2, width)
 y = np.linspace(-pix*height/2, pix*height/2, height)
