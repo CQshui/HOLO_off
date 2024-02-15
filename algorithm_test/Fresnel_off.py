@@ -47,7 +47,7 @@ def on_mouse(event, x, y, flags, param):
         U0[min_y + height:img_height, 0:min_x + width] = 0
         U0[0:min_y + height, 0:min_x] = 0
 
-        # 滤出了最中心的高亮像素
+        # 滤出最中心的高亮像素块
         _, binary_image = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
         # binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 1)
         binary_image_blurred = cv2.GaussianBlur(binary_image, (1, 1), 50)
@@ -88,16 +88,15 @@ def on_mouse(event, x, y, flags, param):
 
 
 # 背景图
-back = Image.open('D:\\Desktop\\test\\Bg-noRule-Gyp.jpg')
+# back = Image.open('D:\\Desktop\\test\\bg\\Bg-noRule-Gyp.jpg')
 # 原始图像
-# image0 = Image.open('D:\\Desktop\\test\\Bg-noRule-Lime.jpg')
-image0 = Image.open('D:\\Desktop\\test\\iron.jpg')
+image0 = Image.open('D:\\Desktop\\test\\origin\\Test6-Dry-Limestone-noRule-1.jpg')
 width, height = image0.size
 # 生成原始图像和背景图的灰度图和数组
 grayscale_image = image0.convert("L")
 grayscale_array = np.asarray(grayscale_image)
-background_image = back.convert("L")
-background_array = np.asarray(background_image)
+# background_image = back.convert("L")
+# background_array = np.asarray(background_image)
 # 减背景
 # grayscale_array = grayscale_array-0.5*background_array
 # plt.imsave('D:\Desktop\\test\\back_removed.jpg', grayscale_array, cmap="gray")
@@ -114,33 +113,29 @@ for img_path in glob.glob(img_paths):
 
 # 对截取后的U0重建
 U0_processed = ifft2(ifftshift(U0))
-# plt.imsave('D:\Desktop\\240110\\U0_processed.jpg', np.abs(U0_processed), cmap="gray")
-# plt.imsave('D:\Desktop\\240110\\gray.jpg', np.abs(grayscale_array), cmap="gray")
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 0.098e-6  # 3.55e-6
+pix = 0.098e-6  # 0.098e-6
 k = 2*np.pi/lam
 # 重建距离
-z1 = 0.00001  # 0.0575
-z2 = 0.00003  # 0.0640
+z1 = 0
+z2 = 0.0001
 z_interval = 0.00001
-#
 x = np.linspace(-pix*width/2, pix*width/2, width)
 y = np.linspace(-pix*height/2, pix*height/2, height)
 x, y = np.meshgrid(x, y)
 z = np.linspace(z1, z2, int((z2-z1)/z_interval)+1)
 for i in range(len(z)):
     r = np.sqrt(x**2+y**2+z[i]**2)
-    h = 1/(1j*lam*r)*np.exp(1j*k*r)
+    # h= 1/ (1j*lam*z[i]) * np.exp(1j*k/ (2*z[i]) * (x**2+ y**2))
+    h = z[i]/(1j*lam*r**2)*np.exp(1j*k*r)    # changed, h = 1/(1j*lam*r)*np.exp(1j*k*r)
     H = fft2(fftshift(h))*pix**2
     U1 = fft2(fftshift(U0_processed))
     U2 = U1*H
     U3 = ifftshift(ifft2(U2))
     U4 = phase_unwrap(U3)
-    # compensation_matrix = compensate(U4, height, width)
-    # edges = compensate(U4, height, width)
+    # new_U4 = [[127.5+x/2 for x in row] for row in U4]
     plt.imsave('D:\\Desktop\\test\\offaxis\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U3), cmap="gray")
-    plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U4), cmap="gray")
-    # plt.imsave('D:\\Desktop\\test\\unwrap\\edge_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(edges), cmap="gray")
+    plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
     # plt.imsave('D:\\Desktop\\test\\unwrap\\phase_correct_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U5), cmap="gray")

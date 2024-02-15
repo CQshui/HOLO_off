@@ -7,9 +7,24 @@ from skimage.filters import gaussian
 # 把频谱严格移到中心后似乎不再需要相位补偿，对搭建的第二个离轴系统是如此。可以考虑把高斯滤波相位补偿作为可选的辅助功能并入程序。
 
 
+def find_max_min(arr):
+    max_val = float('-inf')  # 初始化为负无穷大
+    min_val = float('+inf')  # 初始化为正无穷大
+    for row in arr:
+        for num in row:
+            if num > max_val:
+                max_val = num
+            if num < min_val:
+                min_val = num
+    return max_val, min_val
+
+
 def phase_unwrap(U):
     ang = np.angle(U)
     phase_unwrapped = unwrap_phase(ang)
+    # result = find_max_min(phase_unwrapped)
+    # print("最大值：", result[0])
+    # print("最小值：", result[1])
     return phase_unwrapped
 
 
