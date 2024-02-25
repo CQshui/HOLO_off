@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import qApp, QFileDialog
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.showMaximized()
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         MainWindow.setCentralWidget(self.centralwidget)
@@ -66,3 +66,16 @@ class Ui_MainWindow(object):
             self.show()
         except:
             pass
+
+    def __init__(self):
+        super(Ui_MainWindow, self).__init__()
+        self.setWindowFlag(QtCore.Qt.WindowType.MSWindowsFixedSizeDialogHint)
+        self.setupUi(self)
+        self.filePaths = []
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    win = Ui_MainWindow()
+    win.show()
+    sys.exit(app.exec())
