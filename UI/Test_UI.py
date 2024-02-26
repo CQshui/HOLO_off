@@ -7,8 +7,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt5.QtGui import QIcon
 from PyQt6 import QtCore, QtGui, QtWidgets
 import numpy as np
-import cv2
-
+from Fresnel_off import Fresnel_re
 
 class Ui_MainWindow(QMainWindow):
     def setupUi(self, MainWindow):
@@ -27,13 +26,13 @@ class Ui_MainWindow(QMainWindow):
         self.label_2 = QtWidgets.QLabel(parent=self.groupBox)
         self.label_2.setGeometry(QtCore.QRect(20, 60, 81, 16))
         self.label_2.setObjectName("label_2")
-        self.lineEdit = QtWidgets.QLineEdit(parent=self.groupBox)
-        self.lineEdit.setGeometry(QtCore.QRect(100, 30, 113, 20))
-        self.lineEdit.setClearButtonEnabled(False)
-        self.lineEdit.setObjectName("lineEdit")
-        self.lineEdit_2 = QtWidgets.QLineEdit(parent=self.groupBox)
-        self.lineEdit_2.setGeometry(QtCore.QRect(100, 60, 113, 20))
-        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.lamda = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.lamda.setGeometry(QtCore.QRect(100, 30, 113, 20))
+        self.lamda.setClearButtonEnabled(False)
+        self.lamda.setObjectName("lamda")
+        self.pix = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.pix.setGeometry(QtCore.QRect(100, 60, 113, 20))
+        self.pix.setObjectName("pix")
         self.groupBox_3 = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(40, 280, 241, 71))
         self.groupBox_3.setFlat(False)
@@ -43,9 +42,10 @@ class Ui_MainWindow(QMainWindow):
         self.comboBox.setFrame(True)
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
-        self.pushButton = QtWidgets.QPushButton(parent=self.groupBox_3)
-        self.pushButton.setGeometry(QtCore.QRect(150, 30, 75, 24))
-        self.pushButton.setObjectName("pushButton")
+        self.reconstruct = QtWidgets.QPushButton(parent=self.groupBox_3)
+        self.reconstruct.setGeometry(QtCore.QRect(150, 30, 75, 24))
+        self.reconstruct.setObjectName("reconstruct")
+        self.reconstruct.clicked.connect(self.reconstruction)
         self.groupBox_2 = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.groupBox_2.setGeometry(QtCore.QRect(40, 160, 241, 91))
         self.groupBox_2.setFlat(False)
@@ -56,24 +56,22 @@ class Ui_MainWindow(QMainWindow):
         self.label_4 = QtWidgets.QLabel(parent=self.groupBox_2)
         self.label_4.setGeometry(QtCore.QRect(20, 60, 81, 16))
         self.label_4.setObjectName("label_4")
-        self.lineEdit_3 = QtWidgets.QLineEdit(parent=self.groupBox_2)
-        self.lineEdit_3.setGeometry(QtCore.QRect(100, 30, 41, 20))
-        self.lineEdit_3.setObjectName("lineEdit_3")
-        self.lineEdit_4 = QtWidgets.QLineEdit(parent=self.groupBox_2)
-        self.lineEdit_4.setGeometry(QtCore.QRect(100, 60, 113, 20))
-        self.lineEdit_4.setObjectName("lineEdit_4")
-        self.lineEdit_5 = QtWidgets.QLineEdit(parent=self.groupBox_2)
-        self.lineEdit_5.setGeometry(QtCore.QRect(170, 30, 41, 20))
-        self.lineEdit_5.setObjectName("lineEdit_5")
+        self.z1 = QtWidgets.QLineEdit(parent=self.groupBox_2)
+        self.z1.setGeometry(QtCore.QRect(100, 30, 41, 20))
+        self.z1.setObjectName("z1")
+        self.z_interval = QtWidgets.QLineEdit(parent=self.groupBox_2)
+        self.z_interval.setGeometry(QtCore.QRect(100, 60, 113, 20))
+        self.z_interval.setObjectName("z_interval")
+        self.z2 = QtWidgets.QLineEdit(parent=self.groupBox_2)
+        self.z2.setGeometry(QtCore.QRect(170, 30, 41, 20))
+        self.z2.setObjectName("z2")
         self.label_5 = QtWidgets.QLabel(parent=self.groupBox_2)
         self.label_5.setGeometry(QtCore.QRect(150, 30, 16, 16))
         self.label_5.setObjectName("label_5")
         # 图片显示区域
-        self.ShowImage = QtWidgets.QScrollArea(parent=self.centralwidget)
+        self.ShowImage = QtWidgets.QLabel(parent=self.centralwidget)
         self.ShowImage.setGeometry(QtCore.QRect(330, 50, 381, 411))
         self.ShowImage.setFixedSize(600, 600)
-        self.ShowImage.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.ShowImage.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.ShowImage.setObjectName("ShowImage")
         MainWindow.setCentralWidget(self.centralwidget)
         # 菜单栏区域
@@ -86,6 +84,7 @@ class Ui_MainWindow(QMainWindow):
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
         self.actiondakaitupian = QtGui.QAction(parent=MainWindow)
         self.actiondakaitupian.setObjectName("actiondakaitupian")
         self.actiondakaitupian.triggered.connect(self.opening_pic)
@@ -103,7 +102,7 @@ class Ui_MainWindow(QMainWindow):
         self.label_2.setText(_translate("MainWindow", "像素尺寸(μm)"))
         self.groupBox_3.setTitle(_translate("MainWindow", "重建算法"))
         self.comboBox.setItemText(0, _translate("MainWindow", "菲涅尔重建"))
-        self.pushButton.setText(_translate("MainWindow", "开始重建"))
+        self.reconstruct.setText(_translate("MainWindow", "开始重建"))
         self.groupBox_2.setTitle(_translate("MainWindow", "重建范围"))
         self.label_3.setText(_translate("MainWindow", "Z范围(cm)"))
         self.label_4.setText(_translate("MainWindow", "Z间隔(mm)"))
@@ -118,6 +117,7 @@ class Ui_MainWindow(QMainWindow):
         self.filePaths = []
 
     def opening_pic(self):
+        global path1
         try:
             path1, _ = QFileDialog.getOpenFileName(self, "请选择文件", "", "IMG Files (*.png *.jpg *.bmp)")
             self.filePaths.append(path1)
@@ -127,6 +127,19 @@ class Ui_MainWindow(QMainWindow):
             showImage = QImage(np.array(show), np.shape(show)[1], np.shape(show)[0], QImage.Format.Format_RGB888)
             self.ShowImage.setPixmap(QPixmap.fromImage(showImage))
             self.show()
+        except Exception as e:
+            print(e)
+
+    def reconstruction(self):
+        try:
+            # path2 = path1
+            lam = float(self.lamda.text())*1e-9
+            pix = float(self.pix.text())*1e-6
+            z1 = float(self.z1.text())*1e-2
+            z2 = float(self.z2.text())*1e-2
+            z_interval = float(self.z_interval.text())*1e-3
+            run = Fresnel_re(path1, lam=lam, pix=pix, z1=z1, z2=z2, z_interval=z_interval)
+
         except Exception as e:
             print(e)
 
