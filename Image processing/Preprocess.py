@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 # from Fractal import box_counting_dimension
-from Curvature import css, linear_regression
+# from Curvature import css
 # from Blur import blur
 from Hull import hull_solid, defect
 
@@ -9,16 +9,15 @@ from Hull import hull_solid, defect
 def preprocess(pix):
     # pix = 0.098e-6  # unit: m
     # pix = 0.098  # unit: um
-    # img_path = 'D:\\Desktop\\test\\dof\\DOF_gypsum.bmp'
-    img_path = 'D:\\Desktop\\test\\dof\\DOF_limestone.bmp'
+    img_path = 'C:\\Users\\d1009\\Desktop\\test\\dof\\DOF_gypsum.bmp'
+    # img_path = 'C:\\Users\\d1009\\Desktop\\test\\dof\\DOF_limestone.bmp'
     # img_path = 'D:\\Desktop\\test\\dof\\PIC.png'
     img = cv2.imread(img_path, 0)
     im_height, im_width = img.shape
     # _, binary_image = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
     # ret2, binary_image = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 2005, 50)
+    binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 2005, 30)
     inverted_image = cv2.bitwise_not(binary_image)
-    cv2.imwrite('D:\\Desktop\\test\\offaxis\\Gypsum\\result\\binary.jpg', inverted_image)
     # 图片边缘平滑化，考虑15个像素
     inverted_image[0:15, 0:im_width-15] = 0
     inverted_image[0:im_height-15, im_width-15:im_width] = 0
@@ -31,7 +30,6 @@ def preprocess(pix):
     closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel2)
     # 转变为三通道图片
     bgr_image = cv2.cvtColor(opened, cv2.COLOR_GRAY2BGR)
-    cv2.imwrite('D:\\Desktop\\test\\offaxis\\Gypsum\\result\\closed.jpg', bgr_image)
     rgb_image = bgr_image[:, :, ::-1]
     # 高斯平滑
     opened = cv2.GaussianBlur(opened, (5, 5), 0)
@@ -44,8 +42,11 @@ def preprocess(pix):
     perimeter = []
     diameter = []
     roundness = []
-    Roughness = []
-    Hull_num = []
+    roughness = []
+    hull = []
+    solid = []
+    aspect_ratio = []
+    depth_sum = []
 
     for contour in contours:
         if cv2.contourArea(contour)*pix**2 > 100:
@@ -61,7 +62,17 @@ def preprocess(pix):
             roundness.append(4*np.pi*area[count-1]/perimeter[count-1]**2)
             number.append(count)
             # Roughness.append(linear_regression(contour))
-            Hull_num.append(defect(contour))
+            hull.append(defect(contour)[0])
+            solid.append(defect(contour)[1])
+            depth_sum.append(defect(contour)[2])
+
+            # 拟合椭圆
+            ellipse = cv2.fitEllipse(contour)
+            (center, axes, orientation) = ellipse
+            major_axis_length = max(axes)
+            minor_axis_length = min(axes)
+            # 计算长短轴比
+            aspect_ratio.append(major_axis_length / minor_axis_length)
 
     area.insert(0, 'area')
     perimeter.insert(0, 'perimeter')
@@ -72,7 +83,10 @@ def preprocess(pix):
     # diffValue.insert(0, 'diffValue')
     # Fractal_Dim.insert(0, 'Fd')
     # gradient.insert(0, 'gradient')
-    Hull_num.insert(0, 'hull')
+    hull.insert(0, 'hull')
+    solid.insert(0, 'solid')
+    aspect_ratio.insert(0, 'aspect_ratio')
+    depth_sum.insert(0, 'depth_sum')
 
-    cv2.imwrite('D:\\Desktop\\test\\output\\numbered.jpg', bgr_image)
-    return number, area, perimeter, diameter, roundness, Hull_num
+    cv2.imwrite('C:\\Users\\d1009\\Desktop\\test\\output\\numbered.jpg', bgr_image)
+    return number, area, perimeter, diameter, roundness, aspect_ratio, hull, solid, depth_sum
