@@ -19,7 +19,7 @@ def fuseCoeff(coeff1, coeff2, method):
 def counting(count, total):
     count += 1
     print(count, '/', total)
-    return None
+    return count
 
 
 def sobel(array):
@@ -31,27 +31,35 @@ def sobel(array):
     # g_h = cv2.addWeighted(g_xh, 0.5, g_yh, 0.5, 0)
     g_h = np.sqrt(g_xh**2+g_yh**2)
     g_l = np.sqrt(g_xl**2+g_yl**2)
-    var_h = local_variance(g_h, 15)
-    var_l = local_variance(g_l, 15)
+    var_h = local_variance(g_h, 1801)
+    var_l = local_variance(g_l, 1801)
 
     return var_h, var_l
 
 
-def local_variance(array, block_size=500):
-    # 计算块的大小
-    block_size = max(block_size, 3)  # 确保块大小至少为3
-    block_size = block_size - (block_size % 2) + 1  # 确保块大小为奇数
+def local_variance(array, block_size=15):
+    # # 计算块的大小
+    # block_size = max(block_size, 3)  # 确保块大小至少为3
+    # block_size = block_size - (block_size % 2) + 1  # 确保块大小为奇数
+    #
+    # # 计算局部均值
+    # mean_filter = np.ones((block_size, block_size)) / (block_size ** 2)
+    # local_mean = cv2.filter2D(array, -1, mean_filter)
+    #
+    # # 计算局部方差
+    # squared_image = np.square(array.astype(float))
+    # squared_filter = mean_filter ** 2
+    # # local_variance = np.sqrt(np.maximum(cv2.filter2D(squared_image, -1, squared_filter) - np.square(local_mean), 0))
+    # local_variance = cv2.filter2D(squared_image, -1, squared_filter) - np.square(local_mean)
 
-    # 计算局部均值
-    mean_filter = np.ones((block_size, block_size)) / (block_size ** 2)
-    local_mean = cv2.filter2D(array, -1, mean_filter)
+    h = np.ones((block_size, block_size))
+    n = h.sum()
+    n1 = n - 1
+    d1 = cv2.filter2D(array ** 2, -1, h / n1)
+    d2 = cv2.filter2D(array, -1, h) ** 2 / (n * n1)
+    j = np.sqrt(d1 - d2)
 
-    # 计算局部方差
-    squared_image = np.square(array.astype(float))
-    squared_filter = mean_filter ** 2
-    local_variance = cv2.filter2D(squared_image, -1, squared_filter) - np.square(local_mean)
-
-    return local_variance
+    return j
 
 
 # 文件读取
@@ -104,8 +112,6 @@ for image_name in image_files:
 
         judge_h2 = np.ones_like(judge_h1)-judge_h1
         judge_l2 = np.ones_like(judge_l1)-judge_l1
-        ma = judge_h2.max()
-        mb = judge_l2.max()
 
         # 四个小波系数
         c0 = coeff1[0]*judge_l1+coeff2[0]*judge_l2
@@ -123,7 +129,7 @@ for image_name in image_files:
                                   255)
         fusedImage1 = fusedImage1.astype(np.uint8)
         dof_img = fusedImage1
-        counting(count, len(image_files))
+        count = counting(count, len(image_files))
 
     else:
         for i in range(len(coeff1)):
