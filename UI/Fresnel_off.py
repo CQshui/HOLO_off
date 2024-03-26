@@ -94,7 +94,7 @@ def on_mouse(event, x, y, flags, param):
         U0 = np.roll(U0, -delta_y, axis=0)
 
 
-def Fresnel_re(path, lam, pix, z1, z2, z_interval):
+def Fresnel_re(path, lam, pix, z1, z2, z_interval, name='Default'):
     global U0, width, height
     # 背景图
     # back = Image.open('D:\\Desktop\\test\\bg\\Bg-noRule-Gyp.jpg')
@@ -115,8 +115,8 @@ def Fresnel_re(path, lam, pix, z1, z2, z_interval):
     U0 = fftshift(fft2(grayscale_array))
     # 超出灰度阈值，降幂
     U1 = np.log(1 + np.abs(U0))
-    plt.imsave('D:\\Desktop\\test\\FFT.jpg', U1, cmap="gray")
-    img_paths = 'D:\\Desktop\\test\\FFT.jpg'
+    plt.imsave('C:\\Users\\d1009\\Desktop\\test\\FFT.jpg', U1, cmap="gray")
+    img_paths = 'C:\\Users\\d1009\\Desktop\\test\\FFT.jpg'
     for img_path in glob.glob(img_paths):
         img_id = os.path.basename(img_path)
         # img_id = img_name.split('.')[0]
@@ -139,6 +139,10 @@ def Fresnel_re(path, lam, pix, z1, z2, z_interval):
         U3 = ifftshift(ifft2(U2))
         U4 = phase_unwrap(U3)
         # new_U4 = [[127.5+x/2 for x in row] for row in U4]
-        plt.imsave('D:\\Desktop\\test\\offaxis\\result\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U3), cmap="gray")
-        plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
+        off_axis_dir = 'C:\\Users\\d1009\\Desktop\\test\\offaxis\\result\\{:}'.format(name)
+        off_img_path = off_axis_dir + '\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i])
+        if not os.path.exists(off_axis_dir):
+            os.makedirs(off_axis_dir)
+        plt.imsave(off_img_path, abs(U3), cmap="gray")
+        plt.imsave('C:\\Users\\d1009\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
         # plt.imsave('D:\\Desktop\\test\\unwrap\\phase_correct_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U5), cmap="gray")
