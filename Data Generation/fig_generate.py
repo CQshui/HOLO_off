@@ -1,16 +1,19 @@
+import os
+
 import cv2
 import numpy as np
 
 
-def generate(img_path, save_path, choice, types):
+def generate(img_path, save_path, choice, types, file_number=0):
     pix = 0.098
     # img_path = 'C:\\Users\\d1009\\Desktop\\generation\\input\\Gypsum\\DOF_gypsum.bmp'
     img = cv2.imread(img_path, 0)
+    print(img_path)
     im_height, im_width = img.shape
     binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,
-                                         2005, 20)
+                                         805, 5)
     inverted_image = cv2.bitwise_not(binary_image)
-    # 图片边缘平滑化，考虑edge个像素
+    # 图片边缘规整，考虑edge个像素
     edge = 50
     inverted_image[0:edge, 0:im_width-edge] = 0
     inverted_image[0:im_height-edge, im_width-edge:im_width] = 0
@@ -34,7 +37,8 @@ def generate(img_path, save_path, choice, types):
         if cv2.contourArea(contour) * pix ** 2 > 100:
             count += 1
             cropped_img = None
-            cv2.drawContours(contour_img, [contour], -1, (0, 255, 0), 5)
+            mask = None
+            cv2.drawContours(contour_img, [contour], -1, (255, 255, 255), 5)
             x, y, w, h = cv2.boundingRect(contour)
 
             # 在边缘留出空隙edge_generation
@@ -52,13 +56,26 @@ def generate(img_path, save_path, choice, types):
                 cropped_img = contour_img[y - edge_generation:y + h + edge_generation,
                               x - edge_generation:x + w + edge_generation]
 
-            cv2.imwrite(save_path + types + '\\cropped_{:d}.bmp'.format(count),
-                        cropped_img)
+            elif choice == 'mask':
+                mask = np.zeros(img.shape, dtype=np.uint8)
+                cv2.drawContours(mask, [contour], -1, (255, 255, 255), cv2.FILLED)
+                to_crop_img = cv2.bitwise_and(img, img, mask=mask)
+                cropped_img = to_crop_img[y - edge_generation:y + h + edge_generation,
+                              x - edge_generation:x + w + edge_generation]
+
+            cv2.imwrite(save_path + types + '/{:d}_{:d}.bmp'.format(file_number, count), cropped_img)
 
         # cv2.imwrite('C:\\Users\\d1009\\Desktop\\generation\\output\\Gypsum\\numbered.bmp', bgr_image)
 
 
 if __name__ == '__main__':
-    im_path = 'D:\\Desktop\\test\\dof\\DOF_limestone.bmp'
-    saving_path = 'D:\\Desktop\\test\\generation\\'
-    generate(im_path, saving_path, 'contour', 'Limestone')
+    im_path = 'F:/20240326/Limestone'
+    saving_path = 'F:/20240326/Single/'
+    images = os.listdir(im_path)
+    image_files = [f for f in images if any(ext in f.lower() for ext in ('.jpg', '.jpeg', '.png', '.bmp'))]
+    number = 0
+    for image in image_files:
+        im_path = 'F:/20240326/Limestone'
+        number += 1
+        im_path = im_path + '/' + image
+        generate(im_path, saving_path, 'origin', 'Limestone', number)
