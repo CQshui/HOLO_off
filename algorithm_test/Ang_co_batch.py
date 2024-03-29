@@ -13,22 +13,22 @@ def fresnel(in_path, out_path):
     grayscale_array = np.asarray(grayscale_image)
     # grayscale_image.save('output_image.jpg')
 
-    k = 2*np.pi/lam
-    #
-    x = np.linspace(-pix*width/2, pix*width/2, width)
-    y = np.linspace(-pix*height/2, pix*height/2, height)
-    x, y = np.meshgrid(x, y)
-    z = np.linspace(z1, z2, int((z2-z1)/z_interval)+2)
+    # 空间频率
+    fx = np.linspace(-1 / (2 * pix), 1 / (2 * pix), width)
+    fy = np.linspace(-1 / (2 * pix), 1 / (2 * pix), height)
+    FX, FY = np.meshgrid(fx, fy)
+    temp = 1 - ((lam * FX) ** 2 + (lam * FY) ** 2)
+    temp[temp < 0] = 0
+    z = np.linspace(z1, z2, int((z2 - z1) / z_interval) + 2)
 
     for i in range(len(z)):
-        r = np.sqrt(x**2+y**2+z[i]**2)
-        h = 1/(1j*lam*r)*np.exp(1j*k*r)
-        H = fft2(fftshift(h))*pix**2
+        g = np.exp(1j * (2 * np.pi / lam) * z[i] * np.sqrt(temp))
+        g[temp < 0] = 0
+        g = fftshift(g)
         U1 = fft2(fftshift(grayscale_array))
-        U2 = U1*H
+        U2 = U1 * g
         U3 = ifftshift(ifft2(U2))
 
-        # plt.imsave('F:/Result/re_{:d}_{:}.jpg'.format(i+1, z[i]), U3, cmap="gray")
         img_pth = out_path + '/' + 're_{:d}_{:}.jpg'.format(i+1, z[i])
         plt.imsave(img_pth, abs(U3), cmap='gray')
 
@@ -52,11 +52,11 @@ if __name__ == '__main__':
     # 像素大小
     pix = 0.098e-6
     # 重建距离
-    z1 = 0.010e-2
-    z2 = 0.015e-2
-    z_interval = 0.0005e-2
+    z1 = 0.025e-2
+    z2 = 0.030e-2
+    z_interval = 0.001e-2
 
-    input_path = 'F:/Data/20240329/Limestone/0.011'
-    output_path = 'F:/Data/20240329/Reconstruction/Limestone'
+    input_path = 'F:/Data/20240329/Gypsum'
+    output_path = 'F:/Data/20240329/Reconstruction/Gypsum'
+
     batch(input_path, output_path)
-
