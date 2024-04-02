@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from numpy.fft import fftshift, fft2, ifft2, ifftshift
 import matplotlib.pyplot as plt
+from tqdm import tqdm,trange
 
 
 class FresnelBatch(object):
@@ -20,10 +21,14 @@ class FresnelBatch(object):
         self.z = np.linspace(z1, z2, int((z2-z1)/z_interval)+1)
         self.input_pth = input_pth
         self.output_pth = output_pth
+        self.fig_num = 0
+        self.img_names = None
 
     def start(self):
-        img_names = os.listdir(self.input_pth)
-        for img_name in img_names:
+        self.img_names = os.listdir(self.input_pth)
+        pbar = tqdm(total=len(self.img_names), desc='Reconstruct')
+        for img_name in self.img_names:
+            self.fig_num += 1
             self.img_name = img_name
             img_pth = os.path.join(self.input_pth, img_name)
             save_pth = os.path.join(self.output_pth, img_name)
@@ -32,6 +37,7 @@ class FresnelBatch(object):
                 os.makedirs(save_pth)
 
             self.reconstruct(img_pth, save_pth)
+            pbar.update(1)
 
     def reconstruct(self, img_pth, save_pth):
         # 读取图片，生成灰度图
@@ -52,7 +58,7 @@ class FresnelBatch(object):
         self.move_to_center()
 
         # 重建启动
-        U0_processed = ifft2(ifftshift(self.u0))
+        u0_processed = ifft2(ifftshift(self.u0))
         k = 2 * np.pi / self.lam
         x = np.linspace(-self.pix * self.width / 2, self.pix * self.width / 2, self.width)
         y = np.linspace(-self.pix * self.height / 2, self.pix * self.height / 2, self.height)
@@ -62,14 +68,14 @@ class FresnelBatch(object):
             # h= 1/ (1j*lam*z[i]) * np.exp(1j*k/ (2*z[i]) * (x**2+ y**2))
             h = self.z[i] / (1j * self.lam * r ** 2) * np.exp(1j * k * r)  # changed, h = 1/(1j*lam*r)*np.exp(1j*k*r)
             H = fft2(fftshift(h)) * self.pix ** 2
-            U1 = fft2(fftshift(U0_processed))
-            U2 = U1 * H
-            U3 = ifftshift(ifft2(U2))
+            u1 = fft2(fftshift(u0_processed))
+            u2 = u1 * H
+            u3 = ifftshift(ifft2(u2))
             off_axis_dir = self.output_pth + '/{:}'.format(self.img_name)
             off_img_path = off_axis_dir + '/off_{:d}_{:.7f}.jpg'.format(i + 1, self.z[i])
             if not os.path.exists(off_axis_dir):
                 os.makedirs(off_axis_dir)
-            plt.imsave(off_img_path, abs(U3), cmap="gray")
+            plt.imsave(off_img_path, abs(u3), cmap="gray")
 
     def cut(self, fft_pth):
         self.fft_img = cv2.imread(fft_pth, 0)
@@ -101,7 +107,8 @@ class FresnelBatch(object):
             y_center = counter_y[max_index]
             w_center = counter_w[max_index]
             h_center = counter_h[max_index]
-            cv2.rectangle(self.fft_img, (x_center, y_center), (x_center + w_center, y_center + h_center), (0, 255, 0), 8)
+            cv2.rectangle(self.fft_img, (x_center, y_center), (x_center + w_center, y_center + h_center),
+                          (0, 255, 0), 8)
 
             cv2.namedWindow('FFT with Bright Spots', 0)
             cv2.imshow("FFT with Bright Spots", self.fft_img)
@@ -159,7 +166,7 @@ if __name__ == '__main__':
     lam = 532e-9
     pix = 0.098e-6
     z1 = 0.00001
-    z2 = 0.0001
+    z2 = 0.00004
     z_interval = 0.00001
     input_pth = 'F:/Data/test'
     output_pth = 'F:/Result'
