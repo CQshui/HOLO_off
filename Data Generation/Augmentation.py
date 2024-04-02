@@ -74,12 +74,12 @@ def flip(image):
 
 
 # 图片文件夹路径
-file_dir = r'E:/PycharmProjects/image_cluster-master/data/smoke_call/train/1/'
-for img_name in os.listdir(file_dir):
-    img_path = file_dir + img_name
+input_dir = r'F:/Data/20240329/Single/Limestone/'
+save_dir = r'I:/2023_pytorch110_classification_42-master/data/particle1/Limestone/'
+for img_name in os.listdir(input_dir):
+    img_path = input_dir + img_name
     img = cv2.imread(img_path)
+    cv2.imwrite(save_dir + img_name[0:-4] + '.bmp', img)
     # 旋转
-    rotated_90 = rotate(img, 90)
-    cv2.imwrite(file_dir + img_name[0:-4] + '_r90.jpg', rotated_90)
-    rotated_180 = rotate(img, 180)
-    cv2.imwrite(file_dir + img_name[0:-4] + '_r180.jpg', rotated_180)
+    rotated_90 = np.rot90(img, 1)
+    cv2.imwrite(save_dir + img_name[0:-4] + '_r90.bmp', rotated_90)

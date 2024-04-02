@@ -1,37 +1,42 @@
 import os
-
+from scipy.stats import pearsonr
 import numpy as np
 import openpyxl
 from scipy.optimize import least_squares
 import matplotlib.pyplot as plt
 import cv2
+from skimage import measure
 
 
-def box_count(Z, k):
-    """计算所有盒子的数量"""
-    S = np.add.reduceat(
-        np.add.reduceat(Z, np.arange(0, Z.shape[0], k), axis=0),
-        np.arange(0, Z.shape[1], k), axis=1)
+def box_counting_dimension(image):
+    """
+    """
+    # 盒子大小的集合
+    box_sizes = np.array([2, 3, 4, 6, 8, 12, 16, 32])
 
-    # 把每个大于0的格子视作非空
-    return len(np.where((S > 0))[0])
+    # 用于保存每个盒子大小的结果的数组
+    box_counts = np.zeros(len(box_sizes))
 
+    # 对于每个盒子大小
+    for i in range(len(box_sizes)):
+        box_size = box_sizes[i]
 
-def fractal_dimension(Z):
-    """使用盒计数法计算分形维数"""
-    p = min(Z.shape)
-    n = 2**np.floor(np.log(p)/np.log(2))
-    n = int(np.log(n)/np.log(2))
-    sizes = 2**np.arange(n, 1, -1)
+        # 计算在当前盒子大小下被覆盖的部分所占的比例
+        num_box = 0
+        for row in range(0, image.shape[0]-box_size, box_size):
+            for col in range(0, image.shape[1]-box_size, box_size):
+                if np.sum(image[row+box_size, col+box_size]) != 10000:
+                    num_box += 1
 
-    # 计算所有盒子的数量
-    counts = []
-    for size in sizes:
-        counts.append(box_count(Z, size))
+        box_counts[i] = num_box
+    # 拟合结果，得到盒维数
+    box_dimension = np.log(box_counts) / np.log(box_sizes)
 
-    # 计算斜率 （因为在对数图上的线性回归对应着幂律）
-    coeffs = np.polyfit(np.log(sizes), np.log(counts), 1)
-    return -coeffs[0]
+    # 计算斜率
+    slope, intercept = np.polyfit(np.log(box_sizes), np.log(box_counts), 1)
+    correlation, p_value = pearsonr(np.log(box_sizes), np.log(box_counts))
+
+    return -slope
 
 
 def output_xyl():
@@ -43,13 +48,13 @@ def output_xyl():
         for num_value in range(len(temp)):
             ws.cell(row=num_value+1, column=result.index(temp)+1, value=temp[num_value])
 
-    wb.save('D:\\Desktop\\test\\fractal\\output.xlsx')
+    wb.save('C:\\Users\\d1009\\Desktop\\test\\fractal\\output.xlsx')
 
     return None
 
 
-# img_path = 'D:\\Desktop\\test\\generation\\Limestone\\'
-img_path = 'D:\\Desktop\\test\\generation\\Gypsum\\'
+# img_path = 'C:\\Users\\d1009\\Desktop\\test\\generation\\Limestone\\'
+img_path = 'C:\\Users\\d1009\\Desktop\\test\\generation\\Gypsum\\'
 file_names = os.listdir(img_path)
 image_files = [f for f in file_names if any(ext in f.lower() for ext in ('.jpg', '.jpeg', '.png', '.bmp'))]
 Fr = ['FR']
@@ -61,7 +66,9 @@ for file_name in image_files:
     # 构建完整的文件路径
     image_path = os.path.join(img_path, file_name)
     Z = cv2.imread(image_path, 0)
-    Fr.append(fractal_dimension(Z))
+    _, binary_image = cv2.threshold(Z, 127, 255, cv2.THRESH_BINARY)
+    # Z_not = cv2.bitwise_not(binary_image)
+    Fr.append(box_counting_dimension(binary_image/255))
     num.append(number)
 
 output_xyl()

@@ -32,31 +32,27 @@ def curvature(contour):
 def css(contour):
     x = contour[:, 0, 0]
     y = contour[:, 0, 1]
-    # 一阶导，求相邻差值，diff会导致少一个值，用x[0]-x[-1]补足
-    dfx1 = np.diff(x)
-    dfx1 = np.append(dfx1, x[0]-x[-1])
-    dfy1 = np.diff(y)
-    dfy1 = np.append(dfy1, y[0]-y[-1])
-    # 二阶导
-    dfx2 = np.diff(dfx1)
-    dfx2 = np.append(dfx2, dfx1[0]-dfx1[-1])
-    dfy2 = np.diff(dfy1)
-    dfy2 = np.append(dfy2, dfy1[0]-dfy1[-1])
-    # 计算曲率
-    K = np.abs((dfx1*dfy2-dfx2*dfy1)/((dfx1**2+dfy1**2+0.1)**(3/2)))
-    for i in range(len(K)):
-        if K[i] < 0.6:
-            K[i] = 0
+    # 相隔n个值做一次相减
+    n = 60
+    dx1 = []
+    dy1 = []
+    for i in range(len(x)):
+        dx1.append(x[i]-x[i-n])
+        dy1.append(y[i]-y[i-n])
 
-    # 可视化
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(contour[:, 0, 0], contour[:, 0, 1])
-    plt.title('Original Contour')
-    plt.subplot(1, 2, 2)
-    plt.scatter(x, y, c=K, cmap='viridis')
-    plt.colorbar(label='Pixel Values')
-    plt.title('K Contour')
+    # 转为数组
+    dx1 = np.array(dx1)
+    dy1 = np.array(dy1)
+    # 模
+    norm = np.sqrt(dx1**2+dy1**2)
+    # 单位切向量
+    velocity_x = dx1 / norm
+    velocity_y = dy1 / norm
+    dot = np.arange(len(velocity_x))
+    # 绘制线图
+    plt.plot(dot, velocity_y, 'black')
+    plt.xlabel('x')
+    plt.ylabel('y')
     plt.show()
 
     return None
@@ -83,7 +79,7 @@ def css1(contour):
 
     for scale in scales:
         # 对曲率进行高斯平滑
-        ksize = 5
+        ksize = 10
         # gaussian_kernel = cv2.getGaussianKernel(ksize, scale)
         gaussian_kernel = np.exp(-(np.arange(ksize) - ksize // 2) ** 2 / (2 * scale ** 2))
         gaussian_kernel /= np.sum(gaussian_kernel)
