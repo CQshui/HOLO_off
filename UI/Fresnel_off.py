@@ -50,9 +50,9 @@ def on_mouse(event, x, y, flags, param):
         img[0:min_y + rectan_height, 0:min_x] = 0
         cv2.imshow('image', img)
         U0[0:min_y, min_x:img_width] = 0
-        U0[min_y:img_height, min_x + width:img_width] = 0
-        U0[min_y + height:img_height, 0:min_x + width] = 0
-        U0[0:min_y + height, 0:min_x] = 0
+        U0[min_y:img_height, min_x + rectan_width:img_width] = 0
+        U0[min_y + rectan_height:img_height, 0:min_x + rectan_width] = 0
+        U0[0:min_y + rectan_height, 0:min_x] = 0
 
         # 滤出最中心的高亮像素块
         _, binary_image = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
@@ -146,3 +146,14 @@ def Fresnel_re(path, lam, pix, z1, z2, z_interval, name='Default'):
         plt.imsave(off_img_path, abs(U3), cmap="gray")
         plt.imsave('C:\\Users\\d1009\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
         # plt.imsave('D:\\Desktop\\test\\unwrap\\phase_correct_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U5), cmap="gray")
+
+
+if __name__ == '__main__':
+    lam = 532e-9
+    pix = 0.098e-6
+    z1 = 0.01
+    z2 = 0.02
+    z_interval = 0.001
+    input_path = ""
+
+    Fresnel_re(input_path, lam, pix, z1, z2, z_interval)

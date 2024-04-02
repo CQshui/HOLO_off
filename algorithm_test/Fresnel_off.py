@@ -43,9 +43,10 @@ def on_mouse(event, x, y, flags, param):
         img[0:min_y + rectan_height, 0:min_x] = 0
         cv2.imshow('image', img)
         U0[0:min_y, min_x:img_width] = 0
-        U0[min_y:img_height, min_x + width:img_width] = 0
-        U0[min_y + height:img_height, 0:min_x + width] = 0
-        U0[0:min_y + height, 0:min_x] = 0
+        U0[min_y:img_height, min_x + rectan_width:img_width] = 0
+        U0[min_y + rectan_height:img_height, 0:min_x + rectan_width] = 0
+        U0[0:min_y + rectan_height, 0:min_x] = 0
+
 
         # 滤出最中心的高亮像素块
         _, binary_image = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
