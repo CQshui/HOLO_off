@@ -175,5 +175,4 @@ if __name__ == "__main__":
             input_path = img_directory
             output_path = 'F:/Data/20240329/DOF/Limestone/Limestone_DOF_{}.bmp'.format(img_num)
             dof(input_path, output_path)
-
-
+            
