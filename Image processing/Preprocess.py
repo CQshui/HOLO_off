@@ -4,6 +4,7 @@ import numpy as np
 # from Curvature import css
 # from Blur import blur
 from Hull import hull_solid, defect
+from Curvature import css
 
 
 def preprocess(pix):
@@ -16,7 +17,7 @@ def preprocess(pix):
     im_height, im_width = img.shape
     # _, binary_image = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
     # ret2, binary_image = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 2005, 30)
+    binary_image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 2005, 40)
     inverted_image = cv2.bitwise_not(binary_image)
     # 图片边缘平滑化，考虑15个像素
     inverted_image[0:15, 0:im_width-15] = 0
@@ -62,9 +63,10 @@ def preprocess(pix):
             roundness.append(4*np.pi*area[count-1]/perimeter[count-1]**2)
             number.append(count)
             # Roughness.append(linear_regression(contour))
-            hull.append(defect(contour)[0])
-            solid.append(defect(contour)[1])
-            depth_sum.append(defect(contour)[2])
+            hull_element, solid_element, depth_element = defect(contour, count)
+            hull.append(hull_element)
+            solid.append(solid_element)
+            depth_sum.append(depth_element)
 
             # 拟合椭圆
             ellipse = cv2.fitEllipse(contour)
@@ -73,6 +75,14 @@ def preprocess(pix):
             minor_axis_length = min(axes)
             # 计算长短轴比
             aspect_ratio.append(major_axis_length / minor_axis_length)
+
+            # 导数方向
+            # if True:
+            #     css(contour)
+
+            # 画出凸包
+            # if True:
+            #     hull_solid(contour, count)
 
     area.insert(0, 'area')
     perimeter.insert(0, 'perimeter')

@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 from numpy.fft import fftshift, fft2, ifft2, ifftshift
 import matplotlib.pyplot as plt
-from phase_reconstruction import phase_unwrap
+# from phase_reconstruction import phase_unwrap
 
 
 # 对FFT频谱图截图
@@ -87,25 +87,27 @@ def on_mouse(event, x, y, flags, param):
         U0 = np.roll(U0, -delta_y, axis=0)
 
 
-# 背景图
-# back = Image.open('D:\\Desktop\\test\\bg\\Bg-noRule-Gyp.jpg')
 # 原始图像
-image0 = Image.open('D:\\Desktop\\test\\origin\\Test6-Dry-Limestone-noRule-1.jpg')
+image0 = Image.open('C:/Users/d1009/Desktop/test/origin/Test4-Dry-Gypsum-noRule-3.jpg')
 width, height = image0.size
 # 生成原始图像和背景图的灰度图和数组
 grayscale_image = image0.convert("L")
 grayscale_array = np.asarray(grayscale_image)
+
+# 背景图，需要减背景可以加上
+# back = Image.open('D:\\Desktop\\test\\bg\\Bg-noRule-Gyp.jpg')
 # background_image = back.convert("L")
 # background_array = np.asarray(background_image)
 # 减背景
 # grayscale_array = grayscale_array-0.5*background_array
 # plt.imsave('D:\Desktop\\test\\back_removed.jpg', grayscale_array, cmap="gray")
+
 # FFT变换生成频谱图
 U0 = fftshift(fft2(grayscale_array))
 # 超出灰度阈值，降幂
 U1 = np.log(1 + np.abs(U0))
-plt.imsave('D:\\Desktop\\test\\FFT.jpg', U1, cmap="gray")
-img_paths = 'D:\\Desktop\\test\\FFT.jpg'
+plt.imsave('C:/Users/d1009/Desktop/test/FFT.jpg', U1, cmap="gray")  # 频谱图保存路径，需要先设定
+img_paths = 'C:/Users/d1009/Desktop/test/FFT.jpg'
 for img_path in glob.glob(img_paths):
     img_id = os.path.basename(img_path)
     # img_id = img_name.split('.')[0]
@@ -116,16 +118,20 @@ U0_processed = ifft2(ifftshift(U0))
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 0.098e-6  # 0.098e-6
+pix = 0.098e-6
 k = 2*np.pi/lam
+
 # 重建距离
 z1 = 0
 z2 = 0.0001
-z_interval = 0.00001
+z_interval = 0.00001  # 间距
+
 x = np.linspace(-pix*width/2, pix*width/2, width)
 y = np.linspace(-pix*height/2, pix*height/2, height)
 x, y = np.meshgrid(x, y)
 z = np.linspace(z1, z2, int((z2-z1)/z_interval)+1)
+
+# 开始重建
 for i in range(len(z)):
     r = np.sqrt(x**2+y**2+z[i]**2)
     # h= 1/ (1j*lam*z[i]) * np.exp(1j*k/ (2*z[i]) * (x**2+ y**2))
@@ -134,8 +140,7 @@ for i in range(len(z)):
     U1 = fft2(fftshift(U0_processed))
     U2 = U1*H
     U3 = ifftshift(ifft2(U2))
-    U4 = phase_unwrap(U3)
-    # new_U4 = [[127.5+x/2 for x in row] for row in U4]
-    plt.imsave('D:\\Desktop\\test\\offaxis\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U3), cmap="gray")
-    plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
+    # U4 = phase_unwrap(U3)
+    plt.imsave('C:/Users/d1009/Desktop/test/offaxis/result\\offaxis_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U3), cmap="gray")  # 重建后图像保存路径
+    # plt.imsave('D:\\Desktop\\test\\unwrap\\unwrap_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), U4, cmap="gray")
     # plt.imsave('D:\\Desktop\\test\\unwrap\\phase_correct_{:d}_{:.7f}.jpg'.format(i + 1, z[i]), abs(U5), cmap="gray")

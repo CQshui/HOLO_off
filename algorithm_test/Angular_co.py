@@ -3,7 +3,7 @@ from PIL import Image
 from numpy.fft import fftshift, fft2, ifft2, ifftshift
 import matplotlib.pyplot as plt
 # 同轴平面波角谱重建
-image = Image.open('D:\Desktop\\test\\eb18127ba65a9fa711227cc25c129ce.bmp')
+image = Image.open('F:/Data/20240329/Gypsum/1.bmp')
 width, height = image.size
 grayscale_image = image.convert("L")
 grayscale_array = np.asarray(grayscale_image)
@@ -11,13 +11,13 @@ grayscale_array = np.asarray(grayscale_image)
 # 波长
 lam = 532e-9
 # 像素大小
-pix = 1.72e-6
+pix = 0.098e-6
 L = pix*width
 H = pix*height
 # 重建距离
-z1 = 0.0100
-z2 = 0.0120
-z_interval = 0.0001
+z1 = 0.025e-2
+z2 = 0.030e-2
+z_interval = 0.001e-2
 # 空间频率
 fx = np.linspace(-1/(2*pix), 1/(2*pix), width)
 fy = np.linspace(-1/(2*pix), 1/(2*pix), height)
@@ -33,4 +33,4 @@ for i in range(len(z)):
     U1 = fft2(fftshift(grayscale_array))
     U2 = U1*g
     U3 = ifftshift(ifft2(U2))
-    plt.imsave('D:\Desktop\\test\\re_{:d}_{:.4f}.jpg'.format(i+1, z[i]), abs(U3), cmap="gray")
+    plt.imsave('F:/Result/re_{:d}_{:}.jpg'.format(i+1, z[i]), abs(U3), cmap="gray")

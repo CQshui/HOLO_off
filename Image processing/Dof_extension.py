@@ -166,14 +166,14 @@ if __name__ == "__main__":
         dof(input_path, output_path)
 
     else:
-        directory = "F:/Data/20240329/Reconstruction/Gypsum"
+        directory = "F:/Data/20240329/Reconstruction/Limestone"
         img_num = 0
         img_dirs = [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
         for img_dir in img_dirs:
             img_num = img_num + 1
             img_directory = os.path.join(directory, img_dir)
             input_path = img_directory
-            output_path = 'F:/Data/20240329/DOF/Gypsum/DOF_{}.bmp'.format(img_num)
+            output_path = 'F:/Data/20240329/DOF/Limestone/Limestone_DOF_{}.bmp'.format(img_num)
             dof(input_path, output_path)
 
 
