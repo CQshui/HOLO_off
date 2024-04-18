@@ -6,8 +6,11 @@ def output_xyl():
     # 创建一个工作簿
     wb = openpyxl.Workbook()
     ws = wb.active
-    pix = 0.098     # unit= um
-    result = preprocess(pix)
+    # pix unit = um
+    result = preprocess(pix=0.098,
+                        mask_path='K:/pythonProject/Torch_test/result/35.png',
+                        image_path=None
+                        )
     for temp in result[:len(result)]:
         for num_value in range(len(temp)):
             ws.cell(row=num_value+1, column=result.index(temp)+1, value=temp[num_value])
@@ -18,7 +21,7 @@ def output_xyl():
     #     for num_value1 in range(len(temp1)):
     #         ws1.cell(row=num_value1+2, column=result[-1].index(temp1)+2, value=temp1[num_value1])
 
-    wb.save('C:\\Users\\d1009\\Desktop\\test\\output\\output.xlsx')
+    wb.save('output.xlsx')
 
     return None
 
