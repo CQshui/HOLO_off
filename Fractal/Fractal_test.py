@@ -48,7 +48,7 @@ def output_xyl():
         for num_value in range(len(temp)):
             ws.cell(row=num_value+1, column=result.index(temp)+1, value=temp[num_value])
 
-    wb.save('C:\\Users\\d1009\\Desktop\\test\\fractal\\output.xlsx')
+    wb.save('C:\\Users\\d1009\\Desktop\\test\\fractal\\outputG.xlsx')
 
     return None
 

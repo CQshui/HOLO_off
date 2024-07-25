@@ -23,6 +23,7 @@ def counting(count, total):
 
 
 def sobel(array):
+    # HL, LH, HH
     g_xh = cv2.Sobel(array[1][0], cv2.CV_64F, 1, 0)+cv2.Sobel(array[1][2], cv2.CV_64F, 1, 0)
     g_yh = cv2.Sobel(array[1][1], cv2.CV_64F, 0, 1)+cv2.Sobel(array[1][2], cv2.CV_64F, 0, 1)
     g_xl = cv2.Sobel(array[0], cv2.CV_64F, 1, 0)
@@ -31,8 +32,8 @@ def sobel(array):
     # g_h = cv2.addWeighted(g_xh, 0.5, g_yh, 0.5, 0)
     g_h = np.sqrt(g_xh**2+g_yh**2)
     g_l = np.sqrt(g_xl**2+g_yl**2)
-    var_h = local_variance(g_h, 4005)
-    var_l = local_variance(g_l, 4005)
+    var_h = local_variance(g_h, 3)
+    var_l = local_variance(g_l, 3)
 
     return var_h, var_l
 
@@ -136,7 +137,7 @@ def dof(input_pth, output_pth):
             for i in range(len(coeff1)):
                 # The first values in each decomposition is the apprximation values of the top level
                 if i == 0:
-                    c0 = fuseCoeff(coeff1[0], coeff2[0], FUSION_METHOD)
+                    c0 = fuseCoeff(coeff1[0], coeff2[0], FUSION_METHOD1)
                     fusedCooef.append(c0)
                 else:
                     # For the rest of the levels we have tupels with 3 coefficients
@@ -159,10 +160,10 @@ def dof(input_pth, output_pth):
 
 
 if __name__ == "__main__":
-    batch = True
+    batch = False
     if not batch:
-        input_path = "C:\\Users\\d1009\\Desktop\\test\\dof"
-        output_path = "C:\\Users\\d1009\\Desktop\\test\\dof\\DOF.bmp"
+        input_path = r"C:\Users\d1009\Desktop\temp\result\1.jpg"
+        output_path = r"C:\Users\d1009\Desktop\temp\result\dof\dof.jpg"
         dof(input_path, output_path)
 
     else:

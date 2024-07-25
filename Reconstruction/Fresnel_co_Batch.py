@@ -8,13 +8,13 @@ import os
 def fresnel(in_path, out_path):
     # 同轴平面波菲涅尔变换
     image = Image.open(in_path)
-    bg = Image.open(bg_path)
+    # bg = Image.open(bg_path)
 
     width, height = image.size
     grayscale_image = image.convert("L")
     grayscale_array = np.asarray(grayscale_image)
-    bg_gray = bg.convert("L")
-    bg_gray_array = np.asarray(bg_gray)
+    # bg_gray = bg.convert("L")
+    # bg_gray_array = np.asarray(bg_gray)
     # 减背景
     # grayscale_array = grayscale_array/bg_gray_array
 
@@ -55,14 +55,14 @@ if __name__ == '__main__':
     # 波长
     lam = 532e-9
     # 像素大小
-    pix = 0.098e-6
+    pix = 0.186e-6
     # 重建距离
-    z1 = 0.024e-2
-    z2 = 0.028e-2
-    z_interval = 0.0004e-2
+    z1 = 0.0001
+    z2 = 0.006
+    z_interval = 0.0001
 
-    input_path = 'F:/Data/20240329/Gypsum'
-    output_path = 'F:/Data/20240329/Reconstruction/Gypsum'
-    bg_path = 'F:/Data/20240329/bg.bmp'
+    input_path = r'C:\Users\d1009\Desktop\temp'
+    output_path = r'C:\Users\d1009\Desktop\temp\result'
+    # bg_path = 'F:/Data/20240329/bg.bmp'
     batch(input_path, output_path)
 

@@ -22,8 +22,8 @@ from sklearn.metrics import accuracy_score
 import seaborn as sns
 import pickle
 
-df = pd.read_csv("svm_data.csv")
-df = df.drop("id",axis=1)
+df = pd.read_csv(r"I:\0_Datas\se_svm\all.csv")
+df = df.drop("number",axis=1)
 df.info()
 df.head()
 sns.countplot(df["label"])
@@ -36,8 +36,24 @@ train,test = train_test_split(df,test_size=0.3)
 
 # 构建训练集 测试集 特征数组
 features = ['area',
-            'width'
-]
+            'aspect_ratio',
+            'roundness',
+            'solid',
+            # 'gray1',
+            # 'gray2',
+            # 'gray3',
+            # 'contrast',
+            # 'ASM',
+            # 'correlation',
+            # 'entropy',
+            'Hu1',
+            'Hu2',
+            'Hu3',
+            'Hu4',
+            'Hu5',
+            'Hu6',
+            'Hu7'
+            ]
 train_X = train[features]
 test_X = test[features]
 
@@ -60,16 +76,15 @@ model = SVC()
 model.fit(train_X,train_y)
 
 predictions = model.predict(test_X)
-print(predictions)
+# print(predictions)
 
 
 """
 7 模型评价
 """
-accuracy_score(test_y,predictions)        # 0.9298245614035088
-print(accuracy_score(test_y,predictions))
+accuracy_score(test_y,predictions)        # 0.7775100401606426  #sediment 0.3405067684831656print(accuracy_score(test_y,predictions))
 
 
 # save model
-with open('model.pkl', 'wb') as file:
+with open(r'I:\0_Datas\se_svm\model.pkl', 'wb') as file:
     pickle.dump(model, file)

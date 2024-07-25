@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image
 from numpy.fft import fftshift, fft2, ifft2, ifftshift
 import matplotlib.pyplot as plt
+from scipy.signal.windows import tukey
 from tqdm import tqdm
 
 
@@ -33,6 +34,7 @@ class FresnelBatch(object):
 
     def start(self):
         self.img_names = os.listdir(self.input_pth)
+        self.img_names = [f for f in self.img_names if any(ext in f.lower() for ext in ('.jpg', '.jpeg', '.png', '.bmp'))]
         pbar = tqdm(total=len(self.img_names), desc='Reconstruct')
         for img_name in self.img_names:
             self.fig_num += 1
@@ -66,6 +68,22 @@ class FresnelBatch(object):
 
         # 重建启动
         u0_processed = ifft2(ifftshift(self.u0))
+        # 是否使用tukey窗函数切趾
+        tukey_choice = False
+        if tukey_choice:
+            # 创建一维Tukey窗口
+            tukey_window_1d = tukey(min(self.height - 100, self.width - 100), alpha=0.05)
+
+            # 通过外积将一维窗口转换为二维窗口
+            tukey_window_2d = np.outer(tukey_window_1d, tukey_window_1d)
+
+            # 调整窗口的大小以匹配图像的尺寸
+            tukey_window_2d = cv2.resize(tukey_window_2d, (self.width - 100, self.height - 100))
+            img_mask = np.zeros((self.height, self.width), dtype=np.float32)
+            img_mask[50:self.height - 50, 50:self.width - 50] = tukey_window_2d
+
+            u0_processed = u0_processed * img_mask
+        # 继续重建
         k = 2 * np.pi / self.lam
         x = np.linspace(-self.pix * self.width / 2, self.pix * self.width / 2, self.width)
         y = np.linspace(-self.pix * self.height / 2, self.pix * self.height / 2, self.height)
@@ -170,12 +188,11 @@ class FresnelBatch(object):
 
 
 if __name__ == '__main__':
-    lam = 532e-9
-    pix = 0.098e-6
-    z1 = 0.00001
-    z2 = 0.00004
-    z_interval = 0.00001
-    input_pth = 'F:/Data/test'
-    output_pth = 'F:/Result'
-    image = FresnelBatch(lam, pix, z1, z2, z_interval, input_pth, output_pth)
+    image = FresnelBatch(lam=532e-9,
+                         pix=0.223e-6,
+                         z1=0.00011,
+                         z2=0.00011,
+                         z_interval=0.00001,
+                         input_pth=r'F:\Data\20240717\yilishi\3\0.00011',
+                         output_pth=r'F:\Data\20240717\yilishi\3\reconstruction')
     image.start()

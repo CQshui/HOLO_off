@@ -10,6 +10,6 @@ def batch_rename_files(directory_path, new_prefix):
 
 
 if __name__ == '__main__':
-    path = 'F:/Data/20240329/DOF/Gypsum'
-    prefix = 'Gypsum_'
+    path = r'F:\Data\20240711\mengtuoshi\single\mengtuoshi'
+    prefix = 'a_'
     batch_rename_files(path, prefix)

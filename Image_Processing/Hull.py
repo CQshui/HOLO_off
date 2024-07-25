@@ -49,7 +49,7 @@ def defect(contour, count):
     solid = area/hull_area
 
     # 绘制原始点
-    plt.plot(contour[:, 0, 0]*pix, contour[:, 0, 1]*pix, 'b.', label='Original Contour')
+    # plt.plot(contour[:, 0, 0]*pix, contour[:, 0, 1]*pix, 'b.', label='Original Contour')
 
     # 绘制凸包
     dot_x = []
@@ -59,7 +59,7 @@ def defect(contour, count):
         dot_x.append(dot[0])
         dot_y.append(dot[1])
 
-    plt.plot(np.array(dot_x)*pix, np.array(dot_y)*pix, 'g-', label='Convex Hull')
+    # plt.plot(np.array(dot_x)*pix, np.array(dot_y)*pix, 'g-', label='Convex Hull')
 
     # 如果有凸缺陷，绘制
     far_x = []
@@ -71,14 +71,14 @@ def defect(contour, count):
             far_x.append(far[0])
             far_y.append(far[1])
 
-        plt.plot(np.array(far_x)*pix, np.array(far_y)*pix, 'ro', label='Convex Defect')  # 表示凸缺陷的远点
+        # plt.plot(np.array(far_x)*pix, np.array(far_y)*pix, 'ro', label='Convex Defect')  # 表示凸缺陷的远点
 
-    # 设置图例和显示图形
-    plt.axis('equal')  # 设置坐标轴比例相等，使图形不扭曲
-    plt.title('Gypsum {:d}'.format(count))
-    plt.xlabel('X / μm')
-    plt.ylabel('Y / μm')
-    plt.legend(loc='upper right')
-    plt.show()
+    # # 设置图例和显示图形
+    # plt.axis('equal')  # 设置坐标轴比例相等，使图形不扭曲
+    # plt.title('Gypsum {:d}'.format(count))
+    # plt.xlabel('X / μm')
+    # plt.ylabel('Y / μm')
+    # plt.legend(loc='upper right')
+    # plt.show()
 
     return num_large_defects, solid, depth_sum
